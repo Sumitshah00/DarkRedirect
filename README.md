@@ -140,5 +140,5 @@ If you like this tool, give it a ⭐ on GitHub!\
 For any queries, contact **HackSageX aka Sumit Shah**.
 
 📩 **INSTA:** [hacksagex](https://www.instagram.com/hacksagex/)\
-🗮️ **GitHub:** [yourusername](https://github.com/sumitshah00)
+🗮️ **GitHub:** [Hacksagex](https://github.com/sumitshah00)
 
