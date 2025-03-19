@@ -9,6 +9,7 @@
   [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
   [![Version](https://img.shields.io/badge/Version-1.0.0-green.svg)](https://github.com/hacksagex/darkredirect)
 </div>
+
 ## Features
 
 - Command-line and GUI interfaces
