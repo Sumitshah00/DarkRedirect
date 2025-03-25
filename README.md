@@ -1,166 +1,105 @@
 <div align="center">
-  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmYxeW5ibnNndDZ3ZWkzODNzNGd5bGxndDV0eGN6Zm81OTFwM2U5eiZlcD12MV9naWZzX3RyZW5kaW5nJmN0PWc/tHIRLHtNwxpjIFqPdV/giphy.gif" alt="DarkRedirect Logo" width="150" style="border-radius: 50%;"/>
+  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmYxeW5ibnNndDZ3ZWkzODNzNGd5bGxndDV0eGN6Zm81OTFwM2U5eiZlcD12MV9naWZzX3RyZW5kaW5nJmN0PWc/tHIRLHtNwxpjIFqPdV/giphy.gif" alt="DarkRedirect Logo" width="150" height="150" style="border-radius: 50%; background: transparent; object-fit: cover;"/>
   
   # DarkRedirect🚀
   
-  **A powerful URL masking tool with CLI and GUI interfaces**
+  **A sophisticated URL masking and redirection tool with both CLI and GUI interfaces**
   
   [![Python](https://img.shields.io/badge/Python-3.x-blue.svg)](https://www.python.org/)
   [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
   [![Version](https://img.shields.io/badge/Version-1.0.0-green.svg)](https://github.com/hacksagex/darkredirect)
 </div>
 
-## Features
+## Overview
 
-- Command-line and GUI interfaces
-- Multiple URL shorteners (TinyURL, DAGD, Clck.ru)
-- QR code generation for masked URLs
-- Custom domain masking
-- History logging and URL validation
-  
-## Detailed Installation Guide
+DarkRedirect is a versatile URL manipulation tool designed for security researchers and developers. It provides powerful URL masking capabilities through both command-line and graphical interfaces, making it suitable for various use cases from penetration testing to legitimate URL management.
 
-### System Requirements
+## Key Features
 
-#### Minimum Requirements
+- **Dual Interface**: Choose between an intuitive GUI or efficient CLI
+- **Multiple URL Shorteners**: Support for TinyURL, DAGD, and Clck.ru
+- **QR Code Generation**: Instantly create QR codes for masked URLs
+- **Custom Domain Masking**: Personalize your redirects with custom domains
+- **History Tracking**: Built-in logging of all URL operations
+- **URL Validation**: Robust checking of input URLs
+- **Cross-Platform**: Works on Windows, Linux, macOS, and Android (Termux)
+
+## System Requirements
+
+### Minimum Specifications
 - Python 3.7 or higher
-- Internet connection for URL shortening services
+- Active internet connection
+- 50MB free disk space
+- Basic terminal knowledge for CLI mode
 
-#### Supported Platforms
-- Linux
-- Android (Termux)
-- macOS
-- Windows
+### Supported Operating Systems
+- Windows 10/11
+- Linux (All major distributions)
+- macOS 10.15+
+- Android via Termux
 
-### Dependencies
+## Installation Guide
 
-```bash
-# Core Dependencies
-python >= 3.7
-tkinter (for GUI mode)
-pip (Python package manager)
-
-# Python Packages
-pyshorteners    # URL shortening services
-qrcode         # QR code generation
-rich           # CLI interface
-Pillow         # Image processing
-pyperclip      # Clipboard management
-```
-
-### Installation Steps
-
-#### Standard Installation
-
-1. **Ensure Python is installed**
-   ```bash
-   python --version
-   # Should output Python 3.7 or higher
-   ```
-
-2. **Clone the Repository**
-   ```bash
-   git clone https://github.com/Sumitshah00/DarkRedirect.git
-   cd DarkRedirect
-   ```
-
-3. **Install Dependencies**
-   ```bash
-   # For Linux/macOS
-   python -m pip install -r requirements.txt
-
-   # For Windows
-   python -m pip install -r requirements.txt
-   ```
-
-#### Termux Installation
+### Quick Start
 
 ```bash
-# Update package list
-pkg update && pkg upgrade
+# Clone the repository
+git clone https://github.com/Sumitshah00/DarkRedirect.git
+cd DarkRedirect
 
-# Install required packages
-pkg install python git
+# Install dependencies
+python -m pip install -r requirements.txt
 
-# Clone repository
- git clone https://github.com/Sumitshah00/DarkRedirect.git
- cd DarkRedirect
-
-# Install Python dependencies
-pip install pyshorteners qrcode rich Pillow pyperclip
-
-# Run the tool
+# Launch the application
 python main.py
 ```
 
 ### Platform-Specific Setup
 
+#### Windows
+```bash
+# Install Python from python.org
+# Ensure Python is added to PATH during installation
+python -m pip install -r requirements.txt
+```
+
 #### Linux
 ```bash
-# Debian/Ubuntu - Install Tkinter
-sudo apt-get update
-sudo apt-get install python3-tk
-
-# CentOS/RHEL
-sudo yum install python3-tkinter
+# Ubuntu/Debian
+sudo apt update
+sudo apt install python3 python3-pip python3-tk
+pip3 install -r requirements.txt
 ```
 
 #### Termux (Android)
 ```bash
-# For clipboard support
-pkg install xclip
-
-# For GUI mode (optional)
-pkg install x11-repo
-pkg install python-tk
+pkg update && pkg upgrade
+pkg install python git
+pip install -r requirements.txt
 ```
 
 #### macOS
 ```bash
 # Using Homebrew
-brew install python-tk
+brew install python
+pip3 install -r requirements.txt
 ```
 
-#### Windows
-- Tkinter comes pre-installed with Python
-- Ensure Python is added to PATH during installation
+## Usage Modes
 
-### Troubleshooting
-
-1. **Missing Tkinter**
-   - Error: `ModuleNotFoundError: No module named 'tkinter'`
-   - Solution: Install tkinter using platform-specific commands above
-
-2. **URL Shortener Issues**
-   - Error: `Connection Error`
-   - Solution: Check internet connection and firewall settings
-
-3. **QR Code Generation Fails**
-   - Error: `ImportError: No module named 'qrcode'`
-   - Solution: Reinstall dependencies:
-     ```bash
-     pip install qrcode pillow
-     ```
-
-4. **Clipboard Operations Fail**
-   - Error: `Cannot access clipboard`
-   - Solution: 
-     ```bash
-     # For Linux
-     sudo apt-get install xclip  # Debian/Ubuntu
-     sudo yum install xclip      # CentOS/RHEL
-
-     # For Termux
-     pkg install xclip
-     ```
-
-### Running the Application
-
+### Interactive Menu
 ```bash
-# Run the main application
-python main.py    # Interactive menu
-python cli.py     # CLI mode
-python gui.py     # GUI mode
+python main.py
+```
+
+### Command Line Interface
+```bash
+python cli.py
+```
+
+### Graphical Interface
+```bash
+python gui.py
 ```
 
 ## Screenshots
@@ -177,18 +116,37 @@ gui:-
 
 ![Screenshot_2025-03-20_01_07_47](https://github.com/user-attachments/assets/3733f7c9-ca66-4c28-b31e-e204c56aa7a1)
 
+## Troubleshooting
+
+### Common Issues
+
+1. **Module Not Found Errors**
+   ```bash
+   pip install -r requirements.txt --force-reinstall
+   ```
+
+2. **Permission Denied**
+   ```bash
+   # Linux/macOS
+   sudo pip3 install -r requirements.txt
+   ```
+
+3. **Tkinter Missing**
+   - Windows: Reinstall Python with Tkinter option
+   - Linux: `sudo apt install python3-tk`
+   - Termux: `pkg install x11-repo && pkg install python-tk`
+
 ## Security Notice
 
-For educational and ethical testing purposes only. Users are responsible for complying with applicable laws and regulations.
+This tool is intended for educational and ethical testing purposes only. Users are responsible for complying with applicable laws and regulations. The developers assume no liability for misuse.
 
 ## License
 
 Created by HackSageX❤️ (Sumit Shah)
-
 ---
 
-##  Admin Contact  
-👤 **HackSageX (Sumit Shah)**  
+##  Contact Information
+🧑🏽‍💻 **HackSageX (Sumit Shah)**  
 📷 **Instagram**: [@SumitShah](https://instagram.com/hacksagex)  
 
 ---
