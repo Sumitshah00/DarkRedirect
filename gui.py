@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
 import pyshorteners
-import re, socket, random, time, qrcode, pyperclip
+import re, socket, random, time, qrcode, pyperclip, threading
 from PIL import Image, ImageTk
 import os
 
@@ -110,12 +110,17 @@ def combiner(masked_url, domain_name, phishing_keyword):
     return f"{url_header}://{domain_name}-{phishing_keyword}@{url_tail}" if phishing_keyword else f"{url_header}://{domain_name}@{url_tail}"
 
 def generate_qr_code(url):
-    qr = qrcode.QRCode(version=1, box_size=10, border=5)
-    qr.add_data(url)
-    qr.make(fit=True)
-    img = qr.make_image(fill='black', back_color='white')
-    img.save("masked_url_qr.png")
-    return img
+    try:
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(url)
+        qr.make(fit=True)
+        img = qr.make_image(fill='black', back_color='white')
+        qr_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "masked_url_qr.png")
+        img.save(qr_path)
+        return img
+    except Exception as e:
+        print(f"Error generating QR code: {e}")
+        return None
 
 def copy_to_clipboard(url):
     pyperclip.copy(url)
@@ -132,31 +137,49 @@ class MatrixBackground:
         self.width = width
         self.height = height
         self.digits = "01"
-        self.font_size = 12
-        self.columns = width // self.font_size
+        self.font_size = 14
+        self.columns = max(1, width // (self.font_size * 2))  # Increased number of columns
         self.positions = [random.randint(-height, 0) for _ in range(self.columns)]
-        self.speed = 50  # Speed of falling digits
+        self.speed = 50  # Reduced delay for faster updates
+        self.last_update = time.time()
+        self.frame_rate = 60  # Increased target FPS
+        self.frame_interval = 1.0 / self.frame_rate
+        self.matrix_items = []
         self.create_matrix()
 
     def create_matrix(self):
         for i in range(self.columns):
-            x = i * self.font_size
+            x = i * self.font_size * 2
             y = self.positions[i]
-            for j in range(random.randint(5, 15)):
+            for j in range(random.randint(3, 10)):
                 char = random.choice(self.digits)
-                self.canvas.create_text(x, y + j * self.font_size, text=char, fill="#00ff00", font=("Courier", self.font_size))
+                item = self.canvas.create_text(x, y + j * self.font_size, text=char, fill="#00ff00", font=("Courier", self.font_size))
+                self.matrix_items.append(item)
 
     def update(self):
-        self.canvas.delete("matrix")
+        current_time = time.time()
+        if current_time - self.last_update < self.frame_interval:
+            self.canvas.after(int(self.speed / 2), self.update)
+            return
+
+        # Clean up old items
+        for item in self.matrix_items:
+            self.canvas.delete(item)
+        self.matrix_items.clear()
+
+        # Create new items
         for i in range(self.columns):
-            x = i * self.font_size
+            x = i * self.font_size * 2
             y = self.positions[i]
-            for j in range(random.randint(5, 15)):
+            for j in range(random.randint(3, 10)):
                 char = random.choice(self.digits)
-                self.canvas.create_text(x, y + j * self.font_size, text=char, fill="#00ff00", font=("Courier", self.font_size), tags="matrix")
+                item = self.canvas.create_text(x, y + j * self.font_size, text=char, fill="#00ff00", font=("Courier", self.font_size))
+                self.matrix_items.append(item)
             self.positions[i] += self.font_size
             if self.positions[i] > self.height:
                 self.positions[i] = random.randint(-self.height, 0)
+
+        self.last_update = current_time
         self.canvas.after(self.speed, self.update)
 
 # GUI Application
@@ -166,13 +189,14 @@ class DarkRedirectApp:
         self.root.title("DarkRedirect")
         self.root.geometry("1000x700")
         self.root.configure(bg="#000000")
+        self.root.bind("<Configure>", self.on_resize)
         self.setup_ui()
 
     def setup_ui(self):
         # Matrix Background
-        self.canvas = tk.Canvas(self.root, width=1000, height=700, bg="#000000", highlightthickness=0)
-        self.canvas.pack()
-        self.matrix = MatrixBackground(self.canvas, 1000, 700)
+        self.canvas = tk.Canvas(self.root, bg="#000000", highlightthickness=0)
+        self.canvas.pack(fill=tk.BOTH, expand=True)
+        self.matrix = MatrixBackground(self.canvas, self.root.winfo_width(), self.root.winfo_height())
         self.matrix.update()
 
         # Main Frame
@@ -188,8 +212,8 @@ class DarkRedirectApp:
         admin_info.pack()
 
         # Random Quote
-        self.quote_label = tk.Label(self.main_frame, text=random.choice(QUOTES), font=("Courier", 12), fg="#00ff00", bg="#000000")
-        self.quote_label.pack(pady=10)
+        self.quote_label = tk.Label(self.main_frame, text=random.choice(QUOTES), font=("Courier", 10), fg="#00ff00", bg="#000000", wraplength=400)
+        self.quote_label.pack(pady=5)
 
         # URL Input
         url_frame = tk.Frame(self.main_frame, bg="#000000")
@@ -228,49 +252,100 @@ class DarkRedirectApp:
         self.qr_label = tk.Label(self.main_frame, bg="#000000")
         self.qr_label.pack(pady=10)
 
-        # History Log
-        history_label = tk.Label(self.main_frame, text="History Log", font=("Courier", 12), fg="#00ff00", bg="#000000")
-        history_label.pack(pady=10)
-        self.history_text = scrolledtext.ScrolledText(self.main_frame, width=80, height=10, font=("Courier", 10), bg="#1a1a1a", fg="#00ff00")
-        self.history_text.pack(pady=10)
+        # History Log with improved scrolling
+        history_frame = tk.Frame(self.main_frame, bg="#000000")
+        history_frame.pack(pady=10, fill=tk.BOTH, expand=True)
+        
+        history_label = tk.Label(history_frame, text="History Log", font=("Courier", 12), fg="#00ff00", bg="#000000")
+        history_label.pack(pady=5)
+        
+        # Create scrollbar first
+        scrollbar = tk.Scrollbar(history_frame)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Create text widget with scrollbar
+        self.history_text = scrolledtext.ScrolledText(
+            history_frame,
+            width=80,
+            height=10,
+            font=("Courier", 10),
+            bg="#1a1a1a",
+            fg="#00ff00",
+            yscrollcommand=scrollbar.set,
+            wrap=tk.WORD
+        )
+        self.history_text.pack(pady=5, padx=5, fill=tk.BOTH, expand=True)
+        
+        # Configure scrollbar
+        scrollbar.config(command=self.history_text.yview)
+        
         self.load_history()
 
+    def on_resize(self, event):
+        if event.widget == self.root:
+            try:
+                width = event.width
+                height = event.height
+                if width > 0 and height > 0:  # Ensure valid dimensions
+                    self.canvas.configure(width=width, height=height)
+                    self.matrix.width = width
+                    self.matrix.height = height
+                    self.matrix.columns = max(1, width // self.matrix.font_size)
+                    self.matrix.positions = [random.randint(-height, 0) for _ in range(self.matrix.columns)]
+                    # Update main frame position
+                    if hasattr(self, 'main_frame'):
+                        self.main_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+            except Exception as e:
+                print(f"Error during resize: {e}")
+
     def generate_url(self):
-        original_url = self.url_entry.get()
-        domain_name = self.domain_entry.get()
-        phishing_keyword = self.phishing_entry.get()
-        service = self.service_var.get()
+        def url_generation_task():
+            original_url = self.url_entry.get()
+            domain_name = self.domain_entry.get()
+            phishing_keyword = self.phishing_entry.get()
+            service = self.service_var.get()
+        
+            if not internet_connection():
+                messagebox.showerror("Error", "No internet connection detected!")
+                return
+        
+            if not validate_url(original_url):
+                messagebox.showerror("Error", "Invalid URL! Please enter a valid URL.")
+                return
+        
+            if not validate_domain(domain_name):
+                messagebox.showerror("Error", "Invalid domain! Please enter a correct domain.")
+                return
+        
+            if phishing_keyword and not validate_phishing_keyword(phishing_keyword):
+                messagebox.showerror("Error", "Invalid keyword! Use letters, numbers, '-' or '_'.")
+                return
+        
+            masked_url = shortener_service(original_url, service)
+            if masked_url == "error":
+                messagebox.showerror("Error", "An error occurred while shortening the URL!")
+                return
+        
+            final_url = combiner(masked_url, domain_name, phishing_keyword)
+            
+            # Update UI in main thread
+            self.root.after(0, lambda: self.update_ui(final_url))
+        
+        # Start URL generation in a separate thread
+        threading.Thread(target=url_generation_task, daemon=True).start()
 
-        if not internet_connection():
-            messagebox.showerror("Error", "No internet connection detected!")
-            return
-
-        if not validate_url(original_url):
-            messagebox.showerror("Error", "Invalid URL! Please enter a valid URL.")
-            return
-
-        if not validate_domain(domain_name):
-            messagebox.showerror("Error", "Invalid domain! Please enter a correct domain.")
-            return
-
-        if phishing_keyword and not validate_phishing_keyword(phishing_keyword):
-            messagebox.showerror("Error", "Invalid keyword! Use letters, numbers, '-' or '_'.")
-            return
-
-        masked_url = shortener_service(original_url, service)
-        if masked_url == "error":
-            messagebox.showerror("Error", "An error occurred while shortening the URL!")
-            return
-
-        final_url = combiner(masked_url, domain_name, phishing_keyword)
+    def update_ui(self, final_url):
         self.result_label.config(text=f"Masked URL: {final_url}")
         self.result_label.bind("<Button-1>", lambda e: copy_to_clipboard(final_url))
 
         # Generate QR Code
         qr_img = generate_qr_code(final_url)
-        qr_img_tk = ImageTk.PhotoImage(qr_img)
-        self.qr_label.config(image=qr_img_tk)
-        self.qr_label.image = qr_img_tk
+        if qr_img:
+            qr_img_tk = ImageTk.PhotoImage(qr_img)
+            self.qr_label.config(image=qr_img_tk)
+            self.qr_label.image = qr_img_tk
+        else:
+            messagebox.showerror("Error", "Failed to generate QR code!")
 
         # Log History
         log_history(final_url)
